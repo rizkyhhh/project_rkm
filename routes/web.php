@@ -4,6 +4,7 @@
 use App\Http\Controllers\KaryawanController;
 use App\Http\Controllers\PresensiController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\NotifikasiController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,5 +43,12 @@ Route::post('/presensi', [PresensiController::class, 'store']);
 Route::get('/presensi/{id}/edit', [PresensiController::class, 'edit']);
 Route::put('/presensi/{id}', [PresensiController::class, 'update']);
 Route::delete('/presensi/{id}', [PresensiController::class, 'destroy']);
+
+Route::get('/notifikasi', [NotifikasiController::class, 'index']);
+Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead']);
+Route::get('/notifikasi/count', [NotifikasiController::class, 'count']);
+Route::post('/notifikasi/read-all', [NotifikasiController::class, 'markAllRead']);
+
+Route::get('/trigger-kontrak-demo', [KaryawanController::class, 'triggerKontrakDemo']);
 
 require __DIR__.'/auth.php';

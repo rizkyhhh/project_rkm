@@ -7,9 +7,11 @@ use App\Models\Cabang;
 use App\Models\Organisasi;
 use App\Models\Jabatan;
 use App\Models\LevelJabatan;
+use App\Services\KontrakService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Carbon\Carbon;
 
 class KaryawanController extends Controller
 {
@@ -22,7 +24,7 @@ class KaryawanController extends Controller
         ]);
     }
 
-        public function create()
+    public function create()
     {
         return Inertia::render('Karyawan/Create', [
             'cabang' => Cabang::all(),
@@ -92,6 +94,27 @@ class KaryawanController extends Controller
         $karyawan->delete();
 
         return redirect('/karyawan')->with('success', 'Data berhasil dihapus');
+    }
+
+    public function triggerKontrakDemo()
+    {
+        $karyawan = app(KontrakService::class)->checkKontrak30Hari();
+
+        $result = $karyawan->map(function ($k) {
+        $daysLeft = ceil(Carbon::now()->diffInDays($k->tanggal_akhir_kontrak));
+
+        return [
+            'nama' => $k->nama_lengkap,
+            'tanggal_akhir_kontrak' => $k->tanggal_akhir_kontrak,
+            'sisa_hari' => $daysLeft . ' hari'
+        ];
+    });
+
+        return response()->json([
+            'message' => 'Notifikasi demo berhasil dibuat',
+            'total' => count($karyawan),
+            'data' => $result
+        ]);
     }
 }
 

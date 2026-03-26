@@ -1,4 +1,5 @@
 import { router, Link, usePage } from "@inertiajs/react";
+import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index({ karyawan }) {
   const { flash } = usePage().props;
@@ -10,7 +11,7 @@ export default function Index({ karyawan }) {
   };
 
   return (
-    <div>
+    <AppLayout>
       <h1>Data Karyawan</h1>
 
       {/* FLASH MESSAGE */}
@@ -28,25 +29,65 @@ export default function Index({ karyawan }) {
       )}
 
       {/* BUTTON TAMBAH */}
-      <Link href="/karyawan/create">Tambah Karyawan</Link>
+      <Link
+        href="/karyawan/create"
+        style={{
+          display: "inline-block",
+          marginBottom: 10,
+          background: "#2563eb",
+          color: "white",
+          padding: "6px 12px",
+          borderRadius: 5,
+          textDecoration: "none",
+        }}
+      >
+        + Tambah Karyawan
+      </Link>
 
-      <ul>
+      {/* LIST DATA */}
+      <div style={{ marginTop: 10 }}>
         {karyawan.map((item) => (
-          <li key={item.id}>
-            {item.nama_lengkap} - {item.cabang?.nama}
+          <div
+            key={item.id}
+            style={{
+              padding: 10,
+              border: "1px solid #ddd",
+              marginBottom: 8,
+              borderRadius: 5,
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <div>
+              <strong>{item.nama_lengkap}</strong>
+              <br />
+              <small>{item.cabang?.nama}</small>
+            </div>
 
-            {" | "}
+            <div>
+              <Link
+                href={`/karyawan/${item.id}/edit`}
+                style={{ marginRight: 10 }}
+              >
+                Edit
+              </Link>
 
-            <Link href={`/karyawan/${item.id}/edit`}>Edit</Link>
-
-            {" | "}
-
-            <button onClick={() => handleDelete(item.id)}>
-              Delete
-            </button>
-          </li>
+              <button
+                onClick={() => handleDelete(item.id)}
+                style={{
+                  color: "white",
+                  background: "red",
+                  border: "none",
+                  padding: "5px 10px",
+                  borderRadius: 5,
+                }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         ))}
-      </ul>
-    </div>
+      </div>
+    </AppLayout>
   );
 }
