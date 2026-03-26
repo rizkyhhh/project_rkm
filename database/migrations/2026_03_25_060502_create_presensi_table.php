@@ -13,6 +13,20 @@ return new class extends Migration
     {
         Schema::create('presensi', function (Blueprint $table) {
             $table->id();
+            $table->date('tanggal');
+            $table->time('jam_masuk')->nullable();
+            $table->time('jam_pulang')->nullable();
+            $table->enum('presensi_status', [
+                'Datang Awal',
+                'Tepat Waktu',
+                'Terlambat',
+                'Absen',
+                'Izin',
+                'Sakit',
+                'Cuti',
+                'Libur'
+            ]);
+            $table->foreignId('id_karyawan')->constrained('karyawan');
             $table->timestamps();
         });
     }
