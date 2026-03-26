@@ -38,6 +38,7 @@ Route::delete('/karyawan/{id}', [KaryawanController::class, 'destroy']);
 Route::get('/presensi', [PresensiController::class, 'index']);
 Route::get('/presensi/create', [PresensiController::class, 'create']);
 Route::post('/presensi', [PresensiController::class, 'store']);
+
 Route::get('/presensi/{id}/edit', [PresensiController::class, 'edit']);
 Route::put('/presensi/{id}', [PresensiController::class, 'update']);
 Route::delete('/presensi/{id}', [PresensiController::class, 'destroy']);

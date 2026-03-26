@@ -9,24 +9,11 @@ export default function Create({ karyawan }) {
     presensi_status: "",
   });
 
-    const handleSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    let status = "";
-
-    if (data.jam_masuk > "08:00") {
-        status = "Terlambat";
-    } else {
-        status = "Tepat Waktu";
-    }
-
-    post("/presensi", {
-        data: {
-        ...data,
-        presensi_status: status,
-        },
-    });
-    };
+    post("/presensi");
+  };
 
   return (
     <div>
@@ -48,6 +35,21 @@ export default function Create({ karyawan }) {
 
         <br />
 
+        {/* Status */}
+        <select
+          value={data.presensi_status}
+          onChange={(e) => setData("presensi_status", e.target.value)}
+        >
+          <option value="">Pilih Status</option>
+          <option value="Hadir">Hadir</option>
+          <option value="Izin">Izin</option>
+          <option value="Sakit">Sakit</option>
+          <option value="Cuti">Cuti</option>
+          <option value="Libur">Libur</option>
+        </select>
+
+        <br />
+
         {/* Tanggal */}
         <input
           type="date"
@@ -57,30 +59,24 @@ export default function Create({ karyawan }) {
 
         <br />
 
-        {/* Jam Masuk */}
-        <input
-          type="time"
-          value={data.jam_masuk}
-          onChange={(e) => setData("jam_masuk", e.target.value)}
-        />
+        {/* Jam hanya muncul kalau hadir */}
+        {data.presensi_status === "" && (
+          <>
+            <input
+              type="time"
+              value={data.jam_masuk}
+              onChange={(e) => setData("jam_masuk", e.target.value)}
+            />
 
-        <br />
+            <br />
 
-        {/* Jam Pulang */}
-        <input
-          type="time"
-          value={data.jam_pulang}
-          onChange={(e) => setData("jam_pulang", e.target.value)}
-        />
-
-        <br />
-
-        {/* Status */}
-        <select
-          value={data.presensi_status}
-          onChange={(e) => setData("presensi_status", e.target.value)}
-        >
-        </select>
+            <input
+              type="time"
+              value={data.jam_pulang}
+              onChange={(e) => setData("jam_pulang", e.target.value)}
+            />
+          </>
+        )}
 
         <br /><br />
 

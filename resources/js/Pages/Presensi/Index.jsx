@@ -48,15 +48,19 @@ export default function Index({ presensi, karyawan, filter }) {
           <li key={item.id}>
             {item.karyawan?.nama_lengkap} - {item.tanggal} - {item.presensi_status}
 
-            <a href={`/presensi/${item.id}/edit`}>Edit</a>
+            {item.id && (
+              <>
+                <a href={`/presensi/${item.id}/edit`}>Edit</a>
 
-            <button onClick={() => {
-              if (confirm("Yakin hapus?")) {
-                router.delete(`/presensi/${item.id}`);
-              }
-            }}>
-              Delete
-            </button>
+                <button onClick={() => {
+                  if (confirm("Yakin hapus?")) {
+                    router.delete(`/presensi/${item.id}`);
+                  }
+                }}>
+                  Delete
+                </button>
+              </>
+            )}
           </li>
         ))}
       </ul>
