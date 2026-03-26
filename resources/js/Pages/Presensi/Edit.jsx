@@ -4,13 +4,28 @@ export default function Edit({ presensi, karyawan }) {
   const { data, setData, put } = useForm({
     id_karyawan: presensi.id_karyawan,
     tanggal: presensi.tanggal,
-    jam_masuk: presensi.jam_masuk,
+    jam_masuk: presensi.jam_masuk || "",
     jam_pulang: presensi.jam_pulang || "",
     presensi_status: presensi.presensi_status,
   });
 
+  const karyawanSelected = karyawan.find(
+    (k) => k.id == data.id_karyawan
+  );
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!data.tanggal || !data.presensi_status) {
+      alert("Lengkapi data");
+      return;
+    }
+
+    if (data.presensi_status === "Hadir" && !data.jam_masuk) {
+      alert("Jam masuk wajib diisi");
+      return;
+    }
+
     put(`/presensi/${presensi.id}`);
   };
 
@@ -19,42 +34,66 @@ export default function Edit({ presensi, karyawan }) {
       <h1>Edit Presensi</h1>
 
       <form onSubmit={handleSubmit}>
+        {/* KARYAWAN (READONLY) */}
+        <div>
+          <label>Karyawan:</label>
+          <br />
+          <b>{karyawanSelected?.nama_lengkap}</b>
+        </div>
+
+        <br />
+
+        {/* STATUS */}
         <select
-          value={data.id_karyawan}
-          onChange={(e) => setData("id_karyawan", e.target.value)}
+          value={data.presensi_status}
+          onChange={(e) => {
+            setData("presensi_status", e.target.value);
+
+            if (e.target.value !== "Hadir") {
+              setData("jam_masuk", "");
+              setData("jam_pulang", "");
+            }
+          }}
         >
-          {karyawan.map((k) => (
-            <option key={k.id} value={k.id}>
-              {k.nama_lengkap}
-            </option>
-          ))}
+          <option value="">Pilih Status</option>
+          <option value="Hadir">Hadir</option>
+          <option value="Izin">Izin</option>
+          <option value="Sakit">Sakit</option>
+          <option value="Cuti">Cuti</option>
+          <option value="Libur">Libur</option>
         </select>
 
+        <br />
+
+        {/* TANGGAL */}
         <input
           type="date"
           value={data.tanggal}
           onChange={(e) => setData("tanggal", e.target.value)}
         />
 
-        <input
-          type="time"
-          value={data.jam_masuk}
-          onChange={(e) => setData("jam_masuk", e.target.value)}
-        />
+        <br />
 
-        <input
-          type="time"
-          value={data.jam_pulang}
-          onChange={(e) => setData("jam_pulang", e.target.value)}
-        />
+        {/* JAM */}
+        {data.presensi_status === "Hadir" && (
+          <>
+            <input
+              type="time"
+              value={data.jam_masuk}
+              onChange={(e) => setData("jam_masuk", e.target.value)}
+            />
 
-        <select
-          value={data.presensi_status}
-          onChange={(e) => setData("presensi_status", e.target.value)}
-        >
-          <option value="Tepat Waktu">Tepat Waktu</option>
-          <option value="Terlambat">Terlambat</option>
-        </select>
+            <br />
+
+            <input
+              type="time"
+              value={data.jam_pulang}
+              onChange={(e) => setData("jam_pulang", e.target.value)}
+            />
+          </>
+        )}
+
+        <br /><br />
 
         <button type="submit">Update</button>
       </form>

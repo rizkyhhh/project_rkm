@@ -13,7 +13,8 @@ use Illuminate\Database\Eloquent\Model;
             'jam_masuk',
             'jam_pulang',
             'presensi_status',
-            'id_karyawan'
+            'id_karyawan',
+            'approval_status',
         ];
 
         public function karyawan()

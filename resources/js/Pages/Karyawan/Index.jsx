@@ -3,7 +3,7 @@ import AppLayout from "@/Layouts/AppLayout";
 
 export default function Index({ karyawan }) {
   const { flash } = usePage().props;
-
+  const { notifikasi, notifikasiUnread } = usePage().props;
   const handleDelete = (id) => {
     if (confirm("Yakin hapus data ini?")) {
       router.delete(`/karyawan/${id}`);
@@ -43,7 +43,45 @@ export default function Index({ karyawan }) {
       >
         + Tambah Karyawan
       </Link>
+      
+        {/* NOTIFIKASI */}
+      <div style={{ marginBottom: 20 }}>
+        <strong>🔔 Notifikasi ({notifikasiUnread})</strong>
 
+        <div style={{
+          border: "1px solid #ddd",
+          padding: 10,
+          borderRadius: 5,
+          marginTop: 5,
+          maxWidth: 400
+        }}>
+          {notifikasi.length === 0 && <p>Tidak ada notifikasi</p>}
+
+          {notifikasi.map((item) => (
+            <div key={item.id} style={{ marginBottom: 8 }}>
+              <b>{item.judul}</b>
+              <br />
+              <small>{item.pesan}</small>
+
+              {!item.is_read && (
+                <>
+                  {" "}
+                  <button
+                    onClick={() => router.post(`/notifikasi/${item.id}/read`)}
+                    style={{ marginLeft: 5 }}
+                  >
+                    ✔
+                  </button>
+                </>
+              )}
+
+              <hr />
+            </div>
+          ))}
+
+          <Link href="/notifikasi">Lihat Semua</Link>
+        </div>
+      </div>
       {/* LIST DATA */}
       <div style={{ marginTop: 10 }}>
         {karyawan.map((item) => (

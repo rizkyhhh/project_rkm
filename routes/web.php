@@ -43,6 +43,8 @@ Route::post('/presensi', [PresensiController::class, 'store']);
 Route::get('/presensi/{id}/edit', [PresensiController::class, 'edit']);
 Route::put('/presensi/{id}', [PresensiController::class, 'update']);
 Route::delete('/presensi/{id}', [PresensiController::class, 'destroy']);
+Route::post('/presensi/{id}/approve', [PresensiController::class, 'approve']);
+Route::post('/presensi/{id}/reject', [PresensiController::class, 'reject']);
 
 Route::get('/notifikasi', [NotifikasiController::class, 'index']);
 Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead']);

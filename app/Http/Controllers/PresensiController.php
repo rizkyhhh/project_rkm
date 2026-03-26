@@ -7,14 +7,13 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use App\Models\Presensi;
 use App\Models\Karyawan;
+use App\Services\NotifikasiService;
 use Inertia\Inertia;
 
 class PresensiController extends Controller
 {
     public function index(Request $request)
     {
-        $tanggal = $request->tanggal ?? Carbon::today()->toDateString();
-
         $query = Presensi::with('karyawan');
 
         if ($request->tanggal) {
@@ -24,33 +23,14 @@ class PresensiController extends Controller
         if ($request->id_karyawan) {
             $query->where('id_karyawan', $request->id_karyawan);
         }
-
-        $presensi = $query->get();
-
-        $karyawan = Karyawan::all();
-
-        $data = [];
-
-        foreach ($karyawan as $k) {
-            $found = $presensi->where('id_karyawan', $k->id)->first();
-
-            if ($found) {
-                $data[] = $found;
-            } else {
-                $data[] = (object)[
-                    'id' => null,
-                    'tanggal' => $tanggal,
-                    'presensi_status' => 'Absen',
-                    'jam_masuk' => null,
-                    'jam_pulang' => null,
-                    'karyawan' => $k
-                ];
-            }
-        }
+        
         return Inertia::render('Presensi/Index', [
-            'presensi' => $data,
-            'karyawan' => $karyawan,
-            'filter' => $request->only('tanggal', 'id_karyawan')
+            'presensi' => $query
+            ->orderByDesc('tanggal')
+            ->orderByDesc('created_at')
+            ->get(),
+            'karyawan' => Karyawan::all(),
+            'filter' => $request->only(['tanggal', 'id_karyawan'])
         ]);
     }
 
@@ -68,48 +48,40 @@ class PresensiController extends Controller
             'tanggal' => 'required|date',
             'jam_masuk' => 'nullable',
             'jam_pulang' => 'nullable',
-            'presensi_status' => 'nullable'
+            'presensi_status' => 'required',
         ]);
 
-        // DUPLICATE CHECK
-        $exists = Presensi::where('id_karyawan', $data['id_karyawan'])
-            ->whereDate('tanggal', $data['tanggal'])
-            ->exists();
-
-        if ($exists) {
-            return back()->with('error', 'Presensi sudah ada di tanggal ini');
-        }
-
-        // VALIDASI JAM
-        if ($data['jam_pulang'] && $data['jam_masuk'] && $data['jam_pulang'] < $data['jam_masuk']) {
-            return back()->with('error', 'Jam pulang tidak valid');
-        }
-
-        // STATUS
-         if ($data['presensi_status'] === 'Hadir') {
-
-            if (!$data['jam_masuk']) {
-                return back()->with('error', 'Jam masuk wajib diisi');
-            }
+        // HADIR 
+        if ($data['presensi_status'] === 'Hadir') {
 
             $jamMasuk = Carbon::parse($data['jam_masuk']);
-            $batas = Carbon::createFromTime(8, 0); // jam 08:00
 
-            if ($jamMasuk->gt($batas)) {
-                $data['presensi_status'] = 'Terlambat';
-            } else {
+            $awal = Carbon::createFromTime(7, 30);
+            $tepat = Carbon::createFromTime(8, 0);
+
+            if ($jamMasuk->lt($awal)) {
+                $data['presensi_status'] = 'Datang Awal';
+            } elseif ($jamMasuk->lte($tepat)) {
                 $data['presensi_status'] = 'Tepat Waktu';
+            } else {
+                $data['presensi_status'] = 'Terlambat';
             }
 
-        } else {
-            // selain hadir → kosongkan jam
+            $data['approval_status'] = 'approved';
+        } 
+        // IZIN / SAKIT / CUTI → pending
+        else if (in_array($data['presensi_status'], ['Izin', 'Sakit', 'Cuti'])) {
+            $data['approval_status'] = 'pending';
             $data['jam_masuk'] = null;
             $data['jam_pulang'] = null;
+        } 
+        else {
+            $data['approval_status'] = 'approved';
         }
 
         Presensi::create($data);
 
-        return redirect('/presensi')->with('success', 'Berhasil tambah presensi');
+        return redirect('/presensi');
     }
 
     public function edit($id)
@@ -129,39 +101,83 @@ class PresensiController extends Controller
             'tanggal' => 'required|date',
             'jam_masuk' => 'nullable',
             'jam_pulang' => 'nullable',
-            'presensi_status' => 'nullable'
+            'presensi_status' => 'required',
         ]);
 
-        // VALIDASI JAM
-        if ($data['jam_pulang'] && $data['jam_masuk'] && $data['jam_pulang'] < $data['jam_masuk']) {
-            return back()->with('error', 'Jam pulang tidak valid');
-        }
-
-        // STATUS
-         if ($data['presensi_status'] === 'Hadir') {
-
-            if (!$data['jam_masuk']) {
-                return back()->with('error', 'Jam masuk wajib diisi');
-            }
+        if ($data['presensi_status'] === 'Hadir') {
 
             $jamMasuk = Carbon::parse($data['jam_masuk']);
-            $batas = Carbon::createFromTime(8, 0); // jam 08:00
 
-            if ($jamMasuk->gt($batas)) {
-                $data['presensi_status'] = 'Terlambat';
-            } else {
+            $awal = Carbon::createFromTime(7, 30);
+            $tepat = Carbon::createFromTime(8, 0);
+
+            if ($jamMasuk->lt($awal)) {
+                $data['presensi_status'] = 'Datang Awal';
+            } elseif ($jamMasuk->lte($tepat)) {
                 $data['presensi_status'] = 'Tepat Waktu';
+            } else {
+                $data['presensi_status'] = 'Terlambat';
             }
 
-        } else {
-            // selain hadir → kosongkan jam
+            $data['approval_status'] = 'approved';
+        } 
+        else if (in_array($data['presensi_status'], ['Izin', 'Sakit', 'Cuti'])) {
+            $data['approval_status'] = 'pending';
             $data['jam_masuk'] = null;
             $data['jam_pulang'] = null;
+        } 
+        else {
+            $data['approval_status'] = 'approved';
         }
 
-        Presensi::create($data);
+        $presensi->update($data);
 
-        return redirect('/presensi')->with('success', 'Presensi berhasil diupdate');
+        return redirect('/presensi');
+    }
+
+    public function approve($id)
+    {
+        $presensi = Presensi::with('karyawan')->findOrFail($id);
+
+        // ambil data SEBELUM update
+        $nama = $presensi->karyawan->nama_lengkap;
+        $jenis = $presensi->presensi_status;
+        $tanggal = Carbon::parse($presensi->tanggal)->translatedFormat('d F Y');
+
+        $presensi->update([
+            'approval_status' => 'approved'
+        ]);
+
+        NotifikasiService::send(
+            $presensi->karyawan->id_user,
+            'Presensi Disetujui',
+            "Pengajuan {$nama} {$jenis} pada tanggal {$tanggal} disetujui"
+        );
+
+        return back();
+    }
+
+    public function reject($id)
+    {
+        $presensi = Presensi::with('karyawan')->findOrFail($id);
+
+        // ambil data SEBELUM update
+        $nama = $presensi->karyawan->nama_lengkap;
+        $jenis = $presensi->presensi_status;
+        $tanggal = Carbon::parse($presensi->tanggal)->translatedFormat('d F Y');
+
+        $presensi->update([
+            'approval_status' => 'rejected',
+            'presensi_status' => 'Absen'
+        ]);
+
+        NotifikasiService::send(
+            $presensi->karyawan->id_user,
+            'Presensi Ditolak',
+            "Pengajuan {$nama} {$jenis} pada tanggal {$tanggal} ditolak"
+        );
+
+        return back();
     }
 
     public function destroy($id)
