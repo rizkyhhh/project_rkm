@@ -47,7 +47,7 @@ Route::post('/presensi/{id}/approve', [PresensiController::class, 'approve']);
 Route::post('/presensi/{id}/reject', [PresensiController::class, 'reject']);
 
 Route::get('/notifikasi', [NotifikasiController::class, 'index']);
-Route::post('/notifikasi/{id}/read', [NotifikasiController::class, 'markAsRead']);
+Route::post('/notifikasi/{id}/mark-as-read', [NotifikasiController::class, 'markAsRead']);
 Route::get('/notifikasi/count', [NotifikasiController::class, 'count']);
 Route::post('/notifikasi/read-all', [NotifikasiController::class, 'markAllRead']);
 

@@ -58,8 +58,11 @@ class PresensiController extends Controller
 
             $awal = Carbon::createFromTime(7, 30);
             $tepat = Carbon::createFromTime(8, 0);
+            $batas = Carbon::createFromTime(9, 0);
 
-            if ($jamMasuk->lt($awal)) {
+            if ($jamMasuk->gt($batas)) {
+                $data['presensi_status'] = 'Absen';
+            } elseif ($jamMasuk->lt($awal)) {
                 $data['presensi_status'] = 'Datang Awal';
             } elseif ($jamMasuk->lte($tepat)) {
                 $data['presensi_status'] = 'Tepat Waktu';
@@ -110,8 +113,11 @@ class PresensiController extends Controller
 
             $awal = Carbon::createFromTime(7, 30);
             $tepat = Carbon::createFromTime(8, 0);
+            $batas = Carbon::createFromTime(9, 0);
 
-            if ($jamMasuk->lt($awal)) {
+            if ($jamMasuk->gt($batas)) {
+                $data['presensi_status'] = 'Absen';
+            } elseif ($jamMasuk->lt($awal)) {
                 $data['presensi_status'] = 'Datang Awal';
             } elseif ($jamMasuk->lte($tepat)) {
                 $data['presensi_status'] = 'Tepat Waktu';

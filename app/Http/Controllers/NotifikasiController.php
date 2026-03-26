@@ -12,7 +12,11 @@ class NotifikasiController extends Controller
     {
         $notifikasi = Notifikasi::where('id_user', Auth::id())
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $item->time = $item->created_at->diffForHumans();
+                return $item;
+            });
 
         return Inertia::render('Notifikasi/Index', [
             'notifikasi' => $notifikasi

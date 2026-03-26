@@ -45,4 +45,25 @@ class KontrakService
 
         return $karyawan;
     }
+
+    public function checkKontrakSemua()
+    {
+        $today = Carbon::now();
+
+        $karyawan = Karyawan::whereNotNull('tanggal_akhir_kontrak')->get();
+
+        foreach ($karyawan as $k) {
+            $days = $today->diffInDays($k->tanggal_akhir_kontrak, false);
+
+            if ($days <= 30 && $days >= 0) {
+                NotifikasiService::sendUnique(
+                    $k->id_user,
+                    'Kontrak Hampir Habis',
+                    "Sisa {$days} hari untuk {$k->nama_lengkap}"
+                );
+            }
+        }
+
+        return $karyawan;
+    }
 }
