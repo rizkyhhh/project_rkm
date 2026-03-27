@@ -45,27 +45,34 @@ export default function Edit({
   };
 
   return (
-    <AppLayout>
-      <div className="max-w-3xl mx-auto">
-        <Card>
-          <h2 className="text-lg font-semibold mb-2">Edit Karyawan</h2>
-          <p className="text-xs text-gray-400 mb-6">
+    <AppLayout
+    title="Edit Data Karyawan"
+  subtitle="Perbarui data karyawan">
+      <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
+
+        {/* HEADER */}
+        <div>
+          <h1 className="text-2xl font-semibold">Edit Data Karyawan</h1>
+          <p className="text-sm text-gray-500">
             Perbarui data karyawan
           </p>
+        </div>
 
+        <Card className="shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
 
             {/* DATA UTAMA */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
+              <h3 className="text-sm font-semibold text-gray-600 mb-3">
                 Data Utama
               </h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-5">
+
                 <div>
-                  <label className="text-sm">Nama</label>
+                  <label className="label">Nama</label>
                   <input
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                     value={data.nama_lengkap}
                     onChange={(e) =>
                       setData("nama_lengkap", e.target.value)
@@ -74,30 +81,31 @@ export default function Edit({
                 </div>
 
                 <div>
-                  <label className="text-sm">NIK</label>
+                  <label className="label">NIK</label>
                   <input
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                     value={data.nomor_induk_karyawan}
                     onChange={(e) =>
                       setData("nomor_induk_karyawan", e.target.value)
                     }
                   />
                 </div>
+
               </div>
             </div>
 
             {/* STRUKTUR */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
+              <h3 className="text-sm font-semibold text-gray-600 mb-3">
                 Struktur Organisasi
               </h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-5">
 
                 <select
-                  className="border rounded px-3 h-10"
+                  className="input"
                   value={data.cabang_id}
-                  onChange={(e) => setData("cabang_id", e.target.value)}
+                  onChange={(e) => setData("cabang_id", parseInt(e.target.value))}
                 >
                   <option value="">-- Pilih Cabang --</option>
                   {cabang.map((c) => (
@@ -108,9 +116,9 @@ export default function Edit({
                 </select>
 
                 <select
-                  className="border rounded px-3 h-10"
+                  className="input"
                   value={data.organisasi_id}
-                  onChange={(e) => setData("organisasi_id", e.target.value)}
+                  onChange={(e) => setData("organisasi_id", parseInt(e.target.value))}
                 >
                   <option value="">-- Pilih Organisasi --</option>
                   {organisasi.map((o) => (
@@ -121,9 +129,9 @@ export default function Edit({
                 </select>
 
                 <select
-                  className="border rounded px-3 h-10"
+                  className="input"
                   value={data.jabatan_id}
-                  onChange={(e) => setData("jabatan_id", e.target.value)}
+                  onChange={(e) => setData("jabatan_id", parseInt(e.target.value))}
                 >
                   <option value="">-- Pilih Jabatan --</option>
                   {jabatan.map((j) => (
@@ -134,10 +142,10 @@ export default function Edit({
                 </select>
 
                 <select
-                  className="border rounded px-3 h-10"
+                  className="input"
                   value={data.level_jabatan_id}
                   onChange={(e) =>
-                    setData("level_jabatan_id", e.target.value)
+                    setData("level_jabatan_id", parseInt(e.target.value))
                   }
                 >
                   <option value="">-- Pilih Level Jabatan --</option>
@@ -161,47 +169,41 @@ export default function Edit({
                 Perbarui periode kontrak karyawan
               </p>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid md:grid-cols-3 gap-5">
 
                 <div>
-                  <label className="text-xs text-gray-500">
-                    Tanggal Gabung
-                  </label>
+                  <label className="label">Tanggal Gabung</label>
                   <input
                     type="date"
                     value={data.tanggal_gabung}
                     onChange={(e) =>
                       setData("tanggal_gabung", e.target.value)
                     }
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-500">
-                    Mulai Kontrak
-                  </label>
+                  <label className="label">Mulai Kontrak</label>
                   <input
                     type="date"
                     value={data.tanggal_mulai_kontrak}
                     onChange={(e) =>
                       setData("tanggal_mulai_kontrak", e.target.value)
                     }
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-500">
-                    Akhir Kontrak
-                  </label>
+                  <label className="label">Akhir Kontrak</label>
                   <input
                     type="date"
                     value={data.tanggal_akhir_kontrak}
                     onChange={(e) =>
                       setData("tanggal_akhir_kontrak", e.target.value)
                     }
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                   />
                 </div>
 
@@ -210,27 +212,30 @@ export default function Edit({
 
             {/* ALAMAT */}
             <div>
-              <label className="text-sm">Alamat</label>
+              <label className="label">Alamat</label>
               <textarea
                 value={data.alamat}
                 onChange={(e) => setData("alamat", e.target.value)}
-                className="w-full border rounded px-3 py-2 mt-1"
+                className="input h-24"
               />
             </div>
 
             {/* BUTTON */}
-            <div className="flex gap-2">
-              <Button type="submit" disabled={processing}>
-                {processing ? "Updating..." : "Update"}
-              </Button>
+            <div className="flex justify-end gap-3 pt-4">
 
               <a href="/karyawan">
                 <Button variant="warning">Kembali</Button>
               </a>
+
+              <Button type="submit" disabled={processing}>
+                {processing ? "Menyimpan..." : "Update"}
+              </Button>
+
             </div>
 
           </form>
         </Card>
+
       </div>
     </AppLayout>
   );

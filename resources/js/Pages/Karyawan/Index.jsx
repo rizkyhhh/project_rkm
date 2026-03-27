@@ -3,22 +3,21 @@ import Card from "@/Components/UI/Card";
 import Button from "@/Components/UI/Button";
 import Badge from "@/Components/UI/Badge";
 import { Link, router } from "@inertiajs/react";
+import { useState } from "react";
 
 export default function Index({ karyawan }) {
 
+  const [search, setSearch] = useState("");
+
   const handleDelete = (id) => {
-    if (confirm("Yakin hapus?")) {
+    if (confirm("Yakin hapus data karyawan ini?")) {
       router.delete(`/karyawan/${id}`);
     }
   };
 
   const formatDate = (date) => {
     if (!date) return "-";
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
+    return new Date(date).toLocaleDateString("id-ID");
   };
 
   const getKontrakInfo = (tanggal) => {
@@ -30,46 +29,80 @@ export default function Index({ karyawan }) {
       return <Badge type="danger">Kontrak Habis</Badge>;
     }
     if (diff <= 7) {
-      return <Badge type="danger">Sisa Kontrak {diff} hari</Badge>;
+      return <Badge type="danger">Sisa {diff} hari</Badge>;
     }
-
     if (diff <= 30) {
-      return <Badge type="warning">Sisa Kontrak {diff} hari</Badge>;
+      return <Badge type="warning">Sisa {diff} hari</Badge>;
     }
 
-    return <Badge type="success">Sisa Kontrak {diff} hari</Badge>;
+    return <Badge type="success">Sisa {diff} hari</Badge>;
   };
 
-  return (
-    <AppLayout>
-      <div className="max-w-4xl mx-auto">
+  // FILTER SEARCH
+  const filtered = karyawan.filter((k) =>
+    k.nama_lengkap.toLowerCase().includes(search.toLowerCase()) ||
+    k.nomor_induk_karyawan.toLowerCase().includes(search.toLowerCase())
+  );
 
-        <div className="flex justify-between mb-4">
-          <h1 className="text-xl font-semibold">Data Karyawan</h1>
+  return (
+    <AppLayout
+    title="Karyawan"
+    subtitle="Manajemen data karyawan">
+      
+      <div className="max-w-6xl mx-auto px-6 py-6 space-y-5">
+        
+
+        {/* HEADER */}
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-semibold">Karyawan</h1>
+            <p className="text-sm text-gray-500">
+              Manajemen data karyawan
+            </p>
+          </div>
 
           <Link href="/karyawan/create">
-            <Button>+ Tambah</Button>
+            <Button>+ Tambah Karyawan</Button>
           </Link>
         </div>
 
-        {karyawan.length === 0 && (
+        {/* SEARCH */}
+        <Card>
+          <input
+            type="text"
+            placeholder="Cari nama atau NIK..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full border rounded-md px-4 h-11 text-sm focus:ring-2 focus:ring-blue-500"
+          />
+        </Card>
+
+        {/* EMPTY */}
+        {filtered.length === 0 && (
           <Card>
-            <p className="text-center text-gray-500">
-              Belum ada data karyawan
+            <p className="text-center text-gray-500 text-sm">
+              Tidak ada data karyawan
             </p>
           </Card>
         )}
 
-        <div className="space-y-3">
-          {karyawan.map((item) => (
-            <Card key={item.id}>
-              <div className="flex justify-between items-center">
+        {/* LIST */}
+        <div className="space-y-4">
 
-                <div>
-                  <h3 className="font-semibold text-lg">
+          {filtered.map((item) => (
+            <Card
+              key={item.id}
+              className="shadow-sm hover:shadow-md transition"
+            >
+              <div className="flex justify-between items-start gap-4">
+
+                {/* LEFT */}
+                <div className="space-y-1">
+
+                  <h3 className="text-lg font-semibold">
                     {item.nama_lengkap}
                   </h3>
-                  
+
                   <p className="text-sm text-gray-500">
                     NIK: {item.nomor_induk_karyawan}
                   </p>
@@ -80,23 +113,26 @@ export default function Index({ karyawan }) {
 
                   <p className="text-sm text-gray-500">
                     {item.jabatan?.nama}
-                    {item.level_jabatan?.nama ? ` • ${item.level_jabatan.nama}` : ""}
+                    {item.level_jabatan?.nama && ` • ${item.level_jabatan.nama}`}
                   </p>
 
-                  <p className="text-xs text-gray-400 mt-1">
-                    Gabung: {formatDate(item.tanggal_gabung)}
-                  </p>
+                  <div className="text-xs text-gray-400 pt-1 space-y-0.5">
+                    <p>Gabung: {formatDate(item.tanggal_gabung)}</p>
+                    <p>
+                      Kontrak: {formatDate(item.tanggal_mulai_kontrak)} →{" "}
+                      {formatDate(item.tanggal_akhir_kontrak)}
+                    </p>
+                  </div>
 
-                  <p className="text-xs text-gray-400">
-                    Kontrak: {formatDate(item.tanggal_mulai_kontrak)} → {formatDate(item.tanggal_akhir_kontrak)}
-                  </p>
-
-                  <div className="mt-2">
+                  <div className="pt-2">
                     {getKontrakInfo(item.tanggal_akhir_kontrak)}
                   </div>
+
                 </div>
 
-                <div className="flex gap-2">
+                {/* RIGHT */}
+                <div className="flex gap-2 shrink-0">
+
                   <Link href={`/karyawan/${item.id}/edit`}>
                     <Button variant="warning">Edit</Button>
                   </Link>
@@ -107,15 +143,16 @@ export default function Index({ karyawan }) {
                   >
                     Delete
                   </Button>
+
                 </div>
 
               </div>
             </Card>
           ))}
+
         </div>
 
       </div>
     </AppLayout>
   );
 }
-

@@ -2,6 +2,7 @@ import AppLayout from "@/Layouts/AppLayout";
 import Card from "@/Components/UI/Card";
 import Button from "@/Components/UI/Button";
 import { useForm } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 
 export default function Create({ cabang, organisasi, jabatan, level_jabatan }) {
   const { data, setData, post, processing } = useForm({
@@ -39,27 +40,34 @@ export default function Create({ cabang, organisasi, jabatan, level_jabatan }) {
   };
 
   return (
-    <AppLayout>
-      <div className="max-w-3xl mx-auto">
-        <Card>
-          <h2 className="text-lg font-semibold mb-2">Tambah Karyawan</h2>
-          <p className="text-xs text-gray-400 mb-6">
+    <AppLayout
+    title="Tambah Karyawan"
+  subtitle="Tambah data karyawan baru">
+      <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
+
+        {/* HEADER */}
+        <div>
+          <h1 className="text-2xl font-semibold">Tambah Data Karyawan</h1>
+          <p className="text-sm text-gray-500">
             Masukkan data karyawan dengan lengkap
           </p>
+        </div>
 
+        <Card className="shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
 
             {/* DATA UTAMA */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
+              <h3 className="text-sm font-semibold text-gray-600 mb-3">
                 Data Utama
               </h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-5">
+
                 <div>
-                  <label className="text-sm">Nama</label>
+                  <label className="label">Nama</label>
                   <input
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                     placeholder="Nama lengkap"
                     value={data.nama_lengkap}
                     onChange={(e) => setData("nama_lengkap", e.target.value)}
@@ -67,26 +75,28 @@ export default function Create({ cabang, organisasi, jabatan, level_jabatan }) {
                 </div>
 
                 <div>
-                  <label className="text-sm">NIK</label>
+                  <label className="label">NIK</label>
                   <input
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                     placeholder="Nomor induk karyawan"
                     value={data.nomor_induk_karyawan}
                     onChange={(e) => setData("nomor_induk_karyawan", e.target.value)}
                   />
                 </div>
+
               </div>
             </div>
 
             {/* STRUKTUR */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
+              <h3 className="text-sm font-semibold text-gray-600 mb-3">
                 Struktur Organisasi
               </h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 gap-5">
+
                 <select
-                  className="border rounded px-3 h-10"
+                  className="input"
                   value={data.cabang_id}
                   onChange={(e) => setData("cabang_id", parseInt(e.target.value))}
                 >
@@ -97,7 +107,7 @@ export default function Create({ cabang, organisasi, jabatan, level_jabatan }) {
                 </select>
 
                 <select
-                  className="border rounded px-3 h-10"
+                  className="input"
                   value={data.organisasi_id}
                   onChange={(e) => setData("organisasi_id", parseInt(e.target.value))}
                 >
@@ -108,7 +118,7 @@ export default function Create({ cabang, organisasi, jabatan, level_jabatan }) {
                 </select>
 
                 <select
-                  className="border rounded px-3 h-10"
+                  className="input"
                   value={data.jabatan_id}
                   onChange={(e) => setData("jabatan_id", parseInt(e.target.value))}
                 >
@@ -119,7 +129,7 @@ export default function Create({ cabang, organisasi, jabatan, level_jabatan }) {
                 </select>
 
                 <select
-                  className="border rounded px-3 h-10"
+                  className="input"
                   value={data.level_jabatan_id}
                   onChange={(e) => setData("level_jabatan_id", parseInt(e.target.value))}
                 >
@@ -128,6 +138,7 @@ export default function Create({ cabang, organisasi, jabatan, level_jabatan }) {
                     <option key={l.id} value={l.id}>{l.nama}</option>
                   ))}
                 </select>
+
               </div>
             </div>
 
@@ -141,31 +152,31 @@ export default function Create({ cabang, organisasi, jabatan, level_jabatan }) {
                 Isi tanggal bergabung dan periode kontrak karyawan
               </p>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid md:grid-cols-3 gap-5">
 
                 <div>
-                  <label className="text-xs text-gray-500">Tanggal Gabung</label>
+                  <label className="label">Tanggal Gabung</label>
                   <input
                     type="date"
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                     onChange={(e) => setData("tanggal_gabung", e.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-500">Mulai Kontrak</label>
+                  <label className="label">Mulai Kontrak</label>
                   <input
                     type="date"
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                     onChange={(e) => setData("tanggal_mulai_kontrak", e.target.value)}
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-500">Akhir Kontrak</label>
+                  <label className="label">Akhir Kontrak</label>
                   <input
                     type="date"
-                    className="w-full border rounded px-3 h-10 mt-1"
+                    className="input"
                     onChange={(e) => setData("tanggal_akhir_kontrak", e.target.value)}
                   />
                 </div>
@@ -173,33 +184,34 @@ export default function Create({ cabang, organisasi, jabatan, level_jabatan }) {
               </div>
 
               <p className="text-xs text-gray-400 mt-2">
-                Contoh: kontrak 1 tahun → mulai 01/01/2025 sampai 31/12/2025
+                Contoh: kontrak 1 tahun → 01/01/2025 sampai 31/12/2025
               </p>
             </div>
 
             {/* ALAMAT */}
             <div>
-              <label className="text-sm">Alamat</label>
+              <label className="label">Alamat</label>
               <textarea
-                className="w-full border rounded px-3 py-2 mt-1"
+                className="input h-24"
                 placeholder="Alamat lengkap"
                 onChange={(e) => setData("alamat", e.target.value)}
               />
             </div>
 
             {/* BUTTON */}
-            <div className="flex gap-2">
+            <div className="flex justify-end gap-3 pt-4">
+              <Link href="/karyawan">
+                <Button variant="warning">Kembali</Button>
+              </Link>
+
               <Button type="submit">
                 {processing ? "Menyimpan..." : "Simpan"}
               </Button>
-
-              <a href="/karyawan">
-                <Button variant="warning">Kembali</Button>
-              </a>
             </div>
 
           </form>
         </Card>
+
       </div>
     </AppLayout>
   );

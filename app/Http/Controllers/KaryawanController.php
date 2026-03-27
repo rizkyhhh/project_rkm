@@ -17,7 +17,9 @@ class KaryawanController extends Controller
 {
     public function index()
     {
-        $karyawan = Karyawan::with(['cabang', 'organisasi', 'jabatan', 'levelJabatan'])->get();
+        $karyawan = Karyawan::with(['cabang', 'organisasi', 'jabatan', 'levelJabatan'])
+            ->where('id_user', Auth::id())
+            ->get();
 
         return Inertia::render('Karyawan/Index', [
             'karyawan' => $karyawan
@@ -37,18 +39,19 @@ class KaryawanController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-        'nama_lengkap' => 'required',
-        'nomor_induk_karyawan' => 'required',
-        'cabang_id' => 'required',
-        'organisasi_id' => 'required',
-        'jabatan_id' => 'required',
-        'level_jabatan_id' => 'required',
-        'tanggal_gabung' => 'required|date',
-        'tanggal_mulai_kontrak' => 'required|date',
-        'tanggal_akhir_kontrak' => 'required|date',
-    ]);
+            'nama_lengkap' => 'required',
+            'nomor_induk_karyawan' => 'required|unique:karyawan,nomor_induk_karyawan',
+            'cabang_id' => 'required',
+            'organisasi_id' => 'required',
+            'jabatan_id' => 'required',
+            'level_jabatan_id' => 'required',
+            'tanggal_gabung' => 'required|date',
+            'tanggal_mulai_kontrak' => 'required|date',
+            'tanggal_akhir_kontrak' => 'required|date|after:tanggal_mulai_kontrak',
+        ]);
 
         $data['id_user'] = Auth::id();
+
         Karyawan::create($data);
 
         return redirect('/karyawan');
@@ -56,32 +59,37 @@ class KaryawanController extends Controller
 
     public function edit($id)
     {
-        $karyawan = \App\Models\Karyawan::findOrFail($id);
+        $karyawan = Karyawan::where('id', $id)
+            ->where('id_user', Auth::id())
+            ->firstOrFail();
 
         return Inertia::render('Karyawan/Edit', [
             'karyawan' => $karyawan,
-            'cabang' => \App\Models\Cabang::all(),
-            'organisasi' => \App\Models\Organisasi::all(),
-            'jabatan' => \App\Models\Jabatan::all(),
-            'level_jabatan' => \App\Models\LevelJabatan::all(),
+            'cabang' => Cabang::all(),
+            'organisasi' => Organisasi::all(),
+            'jabatan' => Jabatan::all(),
+            'level_jabatan' => LevelJabatan::all(),
         ]);
     }
 
     public function update(Request $request, $id)
     {
+        $karyawan = Karyawan::where('id', $id)
+            ->where('id_user', Auth::id())
+            ->firstOrFail();
+
         $data = $request->validate([
             'nama_lengkap' => 'required',
-            'nomor_induk_karyawan' => 'required',
+            'nomor_induk_karyawan' => 'required|unique:karyawan,nomor_induk_karyawan,' . $id,
             'cabang_id' => 'required',
             'organisasi_id' => 'required',
             'jabatan_id' => 'required',
             'level_jabatan_id' => 'required',
             'tanggal_gabung' => 'required|date',
             'tanggal_mulai_kontrak' => 'required|date',
-            'tanggal_akhir_kontrak' => 'required|date',
+            'tanggal_akhir_kontrak' => 'required|date|after:tanggal_mulai_kontrak',
         ]);
 
-        $karyawan = \App\Models\Karyawan::findOrFail($id);
         $karyawan->update($data);
 
         return redirect('/karyawan');
@@ -89,8 +97,10 @@ class KaryawanController extends Controller
 
     public function destroy($id)
     {
-        $karyawan = \App\Models\Karyawan::findOrFail($id);
-        
+        $karyawan = Karyawan::where('id', $id)
+            ->where('id_user', Auth::id())
+            ->firstOrFail();
+
         $karyawan->delete();
 
         return redirect('/karyawan')->with('success', 'Data berhasil dihapus');
@@ -101,14 +111,14 @@ class KaryawanController extends Controller
         $karyawan = app(KontrakService::class)->checkKontrak30Hari();
 
         $result = $karyawan->map(function ($k) {
-        $daysLeft = ceil(Carbon::now()->diffInDays($k->tanggal_akhir_kontrak));
+            $daysLeft = ceil(Carbon::now()->diffInDays($k->tanggal_akhir_kontrak));
 
-        return [
-            'nama' => $k->nama_lengkap,
-            'tanggal_akhir_kontrak' => $k->tanggal_akhir_kontrak,
-            'sisa_hari' => $daysLeft . ' hari'
-        ];
-    });
+            return [
+                'nama' => $k->nama_lengkap,
+                'tanggal_akhir_kontrak' => $k->tanggal_akhir_kontrak,
+                'sisa_hari' => $daysLeft . ' hari'
+            ];
+        });
 
         return response()->json([
             'message' => 'Notifikasi demo berhasil dibuat',
@@ -117,5 +127,3 @@ class KaryawanController extends Controller
         ]);
     }
 }
-
-

@@ -14,7 +14,10 @@ class PresensiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Presensi::with('karyawan');
+        $query = Presensi::with('karyawan')
+            ->whereHas('karyawan', function ($q) {
+                $q->where('id_user', Auth::id());
+            });
 
         if ($request->tanggal) {
             $query->whereDate('tanggal', $request->tanggal);
@@ -23,13 +26,15 @@ class PresensiController extends Controller
         if ($request->id_karyawan) {
             $query->where('id_karyawan', $request->id_karyawan);
         }
-        
+
         return Inertia::render('Presensi/Index', [
             'presensi' => $query
-            ->orderByDesc('tanggal')
-            ->orderByDesc('created_at')
-            ->get(),
-            'karyawan' => Karyawan::all(),
+                ->orderByDesc('tanggal')
+                ->orderByDesc('created_at')
+                ->get(),
+
+            'karyawan' => Karyawan::where('id_user', Auth::id())->get(),
+
             'filter' => $request->only(['tanggal', 'id_karyawan'])
         ]);
     }
@@ -37,7 +42,7 @@ class PresensiController extends Controller
     public function create()
     {
         return Inertia::render('Presensi/Create', [
-            'karyawan' => Karyawan::all()
+            'karyawan' => Karyawan::where('id_user', Auth::id())->get()
         ]);
     }
 
@@ -51,7 +56,12 @@ class PresensiController extends Controller
             'presensi_status' => 'required',
         ]);
 
-        // HADIR 
+        // 🔥 VALIDASI KEPEMILIKAN
+        $karyawan = Karyawan::where('id', $data['id_karyawan'])
+            ->where('id_user', Auth::id())
+            ->firstOrFail();
+
+        // LOGIC PRESENSI
         if ($data['presensi_status'] === 'Hadir') {
 
             $jamMasuk = Carbon::parse($data['jam_masuk']);
@@ -72,7 +82,6 @@ class PresensiController extends Controller
 
             $data['approval_status'] = 'approved';
         } 
-        // IZIN / SAKIT / CUTI → pending
         else if (in_array($data['presensi_status'], ['Izin', 'Sakit', 'Cuti'])) {
             $data['approval_status'] = 'pending';
             $data['jam_masuk'] = null;
@@ -89,15 +98,21 @@ class PresensiController extends Controller
 
     public function edit($id)
     {
+        $presensi = Presensi::whereHas('karyawan', function ($q) {
+            $q->where('id_user', Auth::id());
+        })->findOrFail($id);
+
         return Inertia::render('Presensi/Edit', [
-            'presensi' => Presensi::findOrFail($id),
-            'karyawan' => Karyawan::all()
+            'presensi' => $presensi,
+            'karyawan' => Karyawan::where('id_user', Auth::id())->get()
         ]);
     }
 
     public function update(Request $request, $id)
     {
-        $presensi = Presensi::findOrFail($id);
+        $presensi = Presensi::whereHas('karyawan', function ($q) {
+            $q->where('id_user', Auth::id());
+        })->findOrFail($id);
 
         $data = $request->validate([
             'id_karyawan' => 'required',
@@ -143,9 +158,12 @@ class PresensiController extends Controller
 
     public function approve($id)
     {
-        $presensi = Presensi::with('karyawan')->findOrFail($id);
+        $presensi = Presensi::with('karyawan')
+            ->whereHas('karyawan', function ($q) {
+                $q->where('id_user', Auth::id());
+            })
+            ->findOrFail($id);
 
-        // ambil data SEBELUM update
         $nama = $presensi->karyawan->nama_lengkap;
         $jenis = $presensi->presensi_status;
         $tanggal = Carbon::parse($presensi->tanggal)->translatedFormat('d F Y');
@@ -165,9 +183,12 @@ class PresensiController extends Controller
 
     public function reject($id)
     {
-        $presensi = Presensi::with('karyawan')->findOrFail($id);
+        $presensi = Presensi::with('karyawan')
+            ->whereHas('karyawan', function ($q) {
+                $q->where('id_user', Auth::id());
+            })
+            ->findOrFail($id);
 
-        // ambil data SEBELUM update
         $nama = $presensi->karyawan->nama_lengkap;
         $jenis = $presensi->presensi_status;
         $tanggal = Carbon::parse($presensi->tanggal)->translatedFormat('d F Y');
@@ -188,10 +209,12 @@ class PresensiController extends Controller
 
     public function destroy($id)
     {
-        $presensi = Presensi::findOrFail($id);
+        $presensi = Presensi::whereHas('karyawan', function ($q) {
+            $q->where('id_user', Auth::id());
+        })->findOrFail($id);
+
         $presensi->delete();
 
         return redirect('/presensi')->with('success', 'Presensi berhasil dihapus');
     }
-   
 }

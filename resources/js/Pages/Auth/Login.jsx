@@ -95,6 +95,16 @@ export default function Login({ status, canResetPassword }) {
                     </PrimaryButton>
                 </div>
             </form>
+
+            <div className="mt-4">
+                <button
+                    type="button"
+                    onClick={() => window.location.href = '/auth/google'}
+                    className="w-full bg-red-500 text-white py-2 rounded"
+                >
+                    Login dengan Google
+                </button>
+            </div>
         </GuestLayout>
     );
 }

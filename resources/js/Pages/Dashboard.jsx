@@ -1,26 +1,63 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import AppLayout from "@/Layouts/AppLayout";
+import Card from "@/Components/UI/Card";
 
-export default function Dashboard() {
-    return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Dashboard
-                </h2>
-            }
-        >
-            <Head title="Dashboard" />
+export default function Dashboard({
+  totalKaryawan,
+  totalPresensi,
+  hadir,
+  izin,
+  absen,
+}) {
+  return (
+    <AppLayout
+      title="Dashboard"
+      subtitle="Ringkasan data karyawan dan presensi"
+    >
+      <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6 text-gray-900">
-                            You're logged in!
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </AuthenticatedLayout>
-    );
+        {/* SUMMARY */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
+
+          <Card className="text-center hover:shadow-md transition">
+            <p className="text-sm text-gray-500">Karyawan</p>
+            <p className="text-3xl font-bold">{totalKaryawan}</p>
+          </Card>
+
+          <Card className="text-center hover:shadow-md transition">
+            <p className="text-sm text-gray-500">Presensi</p>
+            <p className="text-3xl font-bold">{totalPresensi}</p>
+          </Card>
+
+          <Card className="text-center hover:shadow-md transition">
+            <p className="text-sm text-gray-500">Hadir</p>
+            <p className="text-3xl font-bold text-green-600">{hadir}</p>
+          </Card>
+
+          {/* 🔥 TAMBAHAN */}
+          <Card className="text-center hover:shadow-md transition">
+            <p className="text-sm text-gray-500">Izin</p>
+            <p className="text-3xl font-bold text-blue-600">{izin}</p>
+          </Card>
+
+          <Card className="text-center hover:shadow-md transition">
+            <p className="text-sm text-gray-500">Absen</p>
+            <p className="text-3xl font-bold text-red-600">{absen}</p>
+          </Card>
+
+        </div>
+
+        {/* INFO */}
+        <Card>
+          <h3 className="text-sm font-semibold text-gray-600 mb-2">
+            Informasi Sistem
+          </h3>
+
+          <p className="text-sm text-gray-500">
+            Dashboard menampilkan ringkasan aktivitas karyawan dan presensi secara real-time.
+          </p>
+        </Card>
+
+      </div>
+    </AppLayout>
+  );
 }

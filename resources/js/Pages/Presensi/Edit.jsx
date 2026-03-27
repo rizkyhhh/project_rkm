@@ -43,110 +43,125 @@ export default function Edit({ presensi, karyawan }) {
   };
 
   return (
-    <AppLayout>
-      <div className="max-w-2xl mx-auto">
-        <Card>
-          <h2 className="text-lg font-semibold mb-6">Edit Presensi</h2>
+    <AppLayout
+    title="Edit Presensi"
+  subtitle="Perbarui data kehadiran">
+  <div className="max-w-5xl mx-auto px-6 py-6 space-y-6">
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+    {/* HEADER */}
+    <div>
+      <h1 className="text-2xl font-semibold">Edit Presensi</h1>
+      <p className="text-sm text-gray-500">
+        Perbarui data kehadiran
+      </p>
+    </div>
 
-            {/* INFO KARYAWAN */}
+    <Card className="shadow-sm">
+      <form onSubmit={handleSubmit} className="space-y-6">
+
+        {/* INFO KARYAWAN */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 mb-3">
+            Informasi Karyawan
+          </h3>
+
+          <div className="input bg-gray-100 flex items-center">
+            {selected?.nama_lengkap}
+          </div>
+        </div>
+
+        {/* DATA */}
+        <div>
+          <h3 className="text-sm font-semibold text-gray-600 mb-3">
+            Data Presensi
+          </h3>
+
+          <div className="grid md:grid-cols-2 gap-5">
+
             <div>
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                Informasi Karyawan
-              </h3>
+              <label className="label">Status</label>
+              <select
+                value={data.presensi_status}
+                onChange={(e) => {
+                  setData("presensi_status", e.target.value);
 
-              <div className="w-full border rounded px-3 h-10 flex items-center bg-gray-100">
-                {selected?.nama_lengkap}
-              </div>
+                  if (e.target.value !== "Hadir") {
+                    setData("jam_masuk", "");
+                    setData("jam_pulang", "");
+                  }
+                }}
+                className="input"
+              >
+                <option value="">Pilih Status</option>
+                <option value="Hadir">Hadir</option>
+                <option value="Izin">Izin</option>
+                <option value="Sakit">Sakit</option>
+                <option value="Cuti">Cuti</option>
+                <option value="Libur">Libur</option>
+              </select>
             </div>
 
-            {/* DATA PRESENSI */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-600 mb-2">
-                Data Presensi
-              </h3>
+              <label className="label">Tanggal</label>
+              <input
+                type="date"
+                value={data.tanggal}
+                onChange={(e) => setData("tanggal", e.target.value)}
+                className="input"
+              />
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
+          </div>
+        </div>
 
-                <div>
-                  <label className="block text-sm mb-1">Status</label>
-                  <select
-                    value={data.presensi_status}
-                    onChange={(e) => {
-                      setData("presensi_status", e.target.value);
+        {/* JAM */}
+        {data.presensi_status === "Hadir" && (
+          <div>
+            <h3 className="text-sm font-semibold text-gray-600 mb-3">
+              Waktu Kehadiran
+            </h3>
 
-                      if (e.target.value !== "Hadir") {
-                        setData("jam_masuk", "");
-                        setData("jam_pulang", "");
-                      }
-                    }}
-                    className="w-full border rounded px-3 h-10"
-                  >
-                    <option value="">-- Pilih Status --</option>
-                    <option value="Hadir">Hadir</option>
-                    <option value="Izin">Izin</option>
-                    <option value="Sakit">Sakit</option>
-                    <option value="Cuti">Cuti</option>
-                    <option value="Libur">Libur</option>
-                  </select>
-                </div>
+            <div className="grid md:grid-cols-2 gap-5">
 
-                <div>
-                  <label className="block text-sm mb-1">Tanggal</label>
-                  <input
-                    type="date"
-                    value={data.tanggal}
-                    onChange={(e) => setData("tanggal", e.target.value)}
-                    className="w-full border rounded px-3 h-10"
-                  />
-                </div>
-
-                {data.presensi_status === "Hadir" && (
-                  <>
-                    <div>
-                      <label className="block text-sm mb-1">Jam Masuk</label>
-                      <input
-                        type="time"
-                        min="06:00"
-                        max="12:00"
-                        value={data.jam_masuk}
-                        onChange={(e) => setData("jam_masuk", e.target.value)}
-                        className="w-full border rounded px-3 h-10"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm mb-1">Jam Pulang</label>
-                      <input
-                        type="time"
-                        min="16:00"
-                        max="21:00"
-                        value={data.jam_pulang}
-                        onChange={(e) => setData("jam_pulang", e.target.value)}
-                        className="w-full border rounded px-3 h-10"
-                      />
-                    </div>
-                  </>
-                )}
-
+              <div>
+                <label className="label">Jam Masuk</label>
+                <input
+                  type="time"
+                  value={data.jam_masuk}
+                  onChange={(e) => setData("jam_masuk", e.target.value)}
+                  className="input"
+                />
               </div>
+
+              <div>
+                <label className="label">Jam Pulang</label>
+                <input
+                  type="time"
+                  value={data.jam_pulang}
+                  onChange={(e) => setData("jam_pulang", e.target.value)}
+                  className="input"
+                />
+              </div>
+
             </div>
+          </div>
+        )}
 
-            {/* BUTTON */}
-            <div className="flex gap-2">
-              <Button type="submit" disabled={processing}>
-                {processing ? "Updating..." : "Update"}
-              </Button>
+        {/* BUTTON */}
+        <div className="flex justify-end gap-3 pt-4">
+          <a href="/presensi">
+            <Button variant="warning">Kembali</Button>
+          </a>
 
-              <a href="/presensi">
-                <Button variant="warning">Kembali</Button>
-              </a>
-            </div>
+          <Button type="submit" disabled={processing}>
+            {processing ? "Updating..." : "Update"}
+          </Button>
+        </div>
 
-          </form>
-        </Card>
-      </div>
-    </AppLayout>
+      </form>
+    </Card>
+
+  </div>
+</AppLayout>
   );
 }

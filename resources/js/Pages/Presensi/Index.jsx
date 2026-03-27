@@ -10,16 +10,12 @@ export default function Index({ presensi, karyawan, filter }) {
   const [idKaryawan, setIdKaryawan] = useState(filter.id_karyawan || "");
 
   const formatDate = (date) => {
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}-${month}-${year}`;
+    return new Date(date).toLocaleDateString("id-ID");
   };
 
   const getBadgeType = (status) => {
     if (status === "Absen") return "danger";
-    if (status === "Sakit" || status === "Cuti") return "warning";
+    if (status === "Sakit" || status === "Cuti") return "info";
     return "success";
   };
 
@@ -29,18 +25,17 @@ export default function Index({ presensi, karyawan, filter }) {
     return "success";
   };
 
+  // 🔥 STATUS GROUPING
+  const hadirStatuses = ["Hadir", "Tepat Waktu", "Datang Awal", "Terlambat"];
+  const izinStatuses = ["Sakit", "Cuti", "Izin"];
+  const absenStatuses = ["Absen"];
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       router.get(
         "/presensi",
-        {
-          tanggal,
-          id_karyawan: idKaryawan,
-        },
-        {
-          preserveState: true,
-          replace: true,
-        }
+        { tanggal, id_karyawan: idKaryawan },
+        { preserveState: true, replace: true }
       );
     }, 300);
 
@@ -48,140 +43,184 @@ export default function Index({ presensi, karyawan, filter }) {
   }, [tanggal, idKaryawan]);
 
   return (
-    <AppLayout>
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-semibold">
-          Data Presensi Karyawan
-        </h1>
-      </div>
+    <AppLayout
+    title="Presensi"
+  subtitle="Monitoring kehadiran karyawan">
+      <div className="max-w-6xl mx-auto px-6 py-6">
 
-      <Card>
-        <div className="flex flex-wrap gap-4 items-end">
-
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">
-              Filter Tanggal
-            </label>
-            <input
-              type="date"
-              value={tanggal}
-              onChange={(e) => setTanggal(e.target.value)}
-              className="border rounded px-3 h-10 w-52"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs text-gray-500 mb-1">
-              Filter Karyawan
-            </label>
-            <select
-              value={idKaryawan}
-              onChange={(e) => setIdKaryawan(e.target.value)}
-              className="border rounded px-3 h-10 w-64"
-            >
-              <option value="">Semua Karyawan</option>
-              {karyawan.map((k) => (
-                <option key={k.id} value={k.id}>
-                  {k.nama_lengkap}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex gap-2">
-            <Button
-              variant="warning"
-              onClick={() => {
-                setTanggal("");
-                setIdKaryawan("");
-                router.get("/presensi", {}, { preserveState: true });
-              }}
-            >
-              Reset Filter
-            </Button>
-
-            <a href="/presensi/create">
-              <Button>+ Tambah Presensi</Button>
-            </a>
-          </div>
-
+        {/* HEADER */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-semibold">Presensi</h1>
+          <p className="text-sm text-gray-500">
+            Monitoring kehadiran karyawan
+          </p>
         </div>
-      </Card>
 
-      <div className="space-y-3 mt-4">
-        {presensi.length === 0 && (
-          <Card>
-            <p className="text-center text-gray-500">
-              Tidak ada data presensi
-            </p>
-          </Card>
-        )}
+        {/* SUMMARY */}
+        <Card>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
 
-        {presensi.map((item) => (
-          <Card key={item.id}>
-            <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-500">Hadir</p>
+              <p className="text-3xl font-bold text-green-600">
+                {presensi.filter(p => hadirStatuses.includes(p.presensi_status)).length}
+              </p>
+            </div>
 
-              <div>
-                <h3 className="font-semibold">
-                  {item.karyawan?.nama_lengkap}
-                </h3>
+            <div>
+              <p className="text-sm text-gray-500">Izin</p>
+              <p className="text-3xl font-bold text-blue-600">
+                {presensi.filter(p => izinStatuses.includes(p.presensi_status)).length}
+              </p>
+            </div>
 
-                <p className="text-sm text-gray-500">
-                  {formatDate(item.tanggal)}
-                </p>
+            <div>
+              <p className="text-sm text-gray-500">Absen</p>
+              <p className="text-3xl font-bold text-red-600">
+                {presensi.filter(p => absenStatuses.includes(p.presensi_status)).length}
+              </p>
+            </div>
 
-                <div className="mt-2 flex gap-2">
-                  <Badge type={getBadgeType(item.presensi_status)}>
-                    {item.presensi_status}
-                  </Badge>
+            <div>
+              <p className="text-sm text-gray-500">Pending</p>
+              <p className="text-3xl font-bold text-yellow-600">
+                {presensi.filter(p => p.approval_status === "pending").length}
+              </p>
+            </div>
 
-                  <Badge type={getApprovalBadge(item.approval_status)}>
-                    {item.approval_status}
-                  </Badge>
-                </div>
+          </div>
+        </Card>
+
+        {/* FILTER */}
+        <Card>
+          <div className="flex flex-wrap gap-6 items-end justify-between">
+
+            <div className="flex gap-6 flex-wrap">
+
+              <div className="flex flex-col min-w-[180px]">
+                <label className="text-sm font-medium text-gray-600 mb-1">
+                  Tanggal
+                </label>
+                <input
+                  type="date"
+                  value={tanggal}
+                  onChange={(e) => setTanggal(e.target.value)}
+                  className="border rounded-md px-4 h-11 text-sm focus:ring-2 focus:ring-blue-500"
+                />
               </div>
 
-              <div className="flex flex-col items-end gap-2">
-
-                <div className="text-xs text-gray-400">
-                  #{item.id}
-                </div>
-
-                <div className="flex gap-2">
-
-                  <a href={`/presensi/${item.id}/edit`}>
-                    <Button variant="warning">Edit</Button>
-                  </a>
-
-                  {item.approval_status === "pending" && (
-                    <>
-                      <button
-                        onClick={() =>
-                          router.post(`/presensi/${item.id}/approve`)
-                        }
-                        className="bg-green-500 text-white text-xs px-2 py-1 rounded"
-                      >
-                        Approve
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          router.post(`/presensi/${item.id}/reject`)
-                        }
-                        className="bg-red-500 text-white text-xs px-2 py-1 rounded"
-                      >
-                        Reject
-                      </button>
-                    </>
-                  )}
-
-                </div>
-
+              <div className="flex flex-col min-w-[220px]">
+                <label className="text-sm font-medium text-gray-600 mb-1">
+                  Karyawan
+                </label>
+                <select
+                  value={idKaryawan}
+                  onChange={(e) => setIdKaryawan(e.target.value)}
+                  className="border rounded-md px-4 h-11 text-sm focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Semua Karyawan</option>
+                  {karyawan.map((k) => (
+                    <option key={k.id} value={k.id}>
+                      {k.nama_lengkap}
+                    </option>
+                  ))}
+                </select>
               </div>
 
             </div>
-          </Card>
-        ))}
+
+            <div className="flex gap-3">
+              <Button
+                variant="warning"
+                onClick={() => {
+                  setTanggal("");
+                  setIdKaryawan("");
+                  router.get("/presensi", {}, { preserveState: true });
+                }}
+              >
+                Reset
+              </Button>
+
+              <a href="/presensi/create">
+                <Button>+ Presensi</Button>
+              </a>
+            </div>
+
+          </div>
+        </Card>
+
+        {/* LIST */}
+        <div className="space-y-5 mt-6">
+
+          {presensi.length === 0 && (
+            <Card>
+              <p className="text-center text-gray-500 text-sm">
+                Tidak ada data presensi
+              </p>
+            </Card>
+          )}
+
+          {presensi.map((item) => (
+            <Card key={item.id} className="shadow-sm hover:shadow-md transition">
+              <div className="flex justify-between items-center">
+
+                {/* LEFT */}
+                <div className="space-y-1">
+                  <h3 className="text-lg font-semibold">
+                    {item.karyawan?.nama_lengkap}
+                  </h3>
+
+                  <p className="text-sm text-gray-500">
+                    {formatDate(item.tanggal)}
+                  </p>
+
+                  <div className="flex gap-2 pt-1">
+                    <Badge type={getBadgeType(item.presensi_status)}>
+                      {item.presensi_status}
+                    </Badge>
+
+                    <Badge type={getApprovalBadge(item.approval_status)}>
+                      {item.approval_status}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* RIGHT */}
+                <div className="flex items-center gap-2">
+
+                  {item.approval_status === "pending" && (
+                    <>
+                      <Button
+                        variant="success"
+                        onClick={() => router.post(`/presensi/${item.id}/approve`)}
+                      >
+                        Approve
+                      </Button>
+
+                      <Button
+                        variant="danger"
+                        onClick={() => router.post(`/presensi/${item.id}/reject`)}
+                      >
+                        Reject
+                      </Button>
+                    </>
+                  )}
+
+                  <Button
+                    variant="warning"
+                    onClick={() => router.visit(`/presensi/${item.id}/edit`)}
+                  >
+                    Edit
+                  </Button>
+
+                </div>
+
+              </div>
+            </Card>
+          ))}
+
+        </div>
+
       </div>
     </AppLayout>
   );
